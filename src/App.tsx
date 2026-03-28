@@ -19,9 +19,6 @@ interface Credential {
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [accessPassword, setAccessPassword] = useState('');
-  const [authError, setAuthError] = useState(false);
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [projects, setProjects] = useState<string[]>([]);
   const [search, setSearch] = useState('');
@@ -41,10 +38,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
-    }
-  }, [isAuthenticated]);
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -61,17 +56,6 @@ export default function App() {
       console.error('Failed to fetch data', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const masterPass = import.meta.env.VITE_ACCESS_PASSWORD || 'password123';
-    if (accessPassword === masterPass) {
-      setIsAuthenticated(true);
-      setAuthError(false);
-    } else {
-      setAuthError(true);
     }
   };
 
@@ -201,60 +185,6 @@ export default function App() {
     setEditingId(null);
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-12"
-        >
-          <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center rotate-6 shadow-sm border border-blue-100">
-              <Shield className="w-10 h-10 text-blue-600 -rotate-6" />
-            </div>
-          </div>
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Secure Vault</h1>
-            <p className="text-slate-500 text-sm">Enter your master password to unlock your credentials.</p>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type="password"
-                  placeholder="Master Password"
-                  value={accessPassword}
-                  onChange={(e) => setAccessPassword(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-4 bg-slate-50 border ${authError ? 'border-red-500 ring-4 ring-red-500/10' : 'border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'} rounded-2xl focus:outline-none transition-all text-lg`}
-                />
-              </div>
-              {authError && (
-                <motion.p 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-red-500 text-xs font-semibold pl-1"
-                >
-                  Incorrect password. Please try again.
-                </motion.p>
-              )}
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2"
-            >
-              Unlock Vault
-            </button>
-          </form>
-          <div className="mt-8 pt-8 border-t border-slate-100 text-center">
-            <p className="text-xs text-slate-400 font-medium">AES-256 Encrypted Storage</p>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] font-sans p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -268,12 +198,6 @@ export default function App() {
             <p className="text-slate-500 mt-1">Manage projects and secure credentials with ease</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setIsAuthenticated(false)}
-              className="px-4 py-2 text-slate-500 hover:text-slate-700 font-medium transition-colors"
-            >
-              Lock Vault
-            </button>
             <button
               onClick={() => setIsProjectModalOpen(true)}
               className="px-4 py-2 border border-slate-200 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors"
