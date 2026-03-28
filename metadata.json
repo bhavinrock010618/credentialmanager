@@ -1,0 +1,5 @@
+{
+  "name": "Secure Credential Manager",
+  "description": "A lightweight, secure web application to manage and search credentials stored in a local JSON file with encryption.",
+  "requestFramePermissions": []
+}
