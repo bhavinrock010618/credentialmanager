@@ -4,7 +4,7 @@
   "framework": "vite",
   "functions": {
     "api/**/*.ts": {
-      "includeFiles": "*.json"
+      "includeFiles": "{data.json,projects.json}"
     }
   },
   "rewrites": [

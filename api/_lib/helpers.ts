@@ -8,8 +8,19 @@ const KEY_BUFFER = crypto.createHash("sha256").update(ENCRYPTION_KEY).digest();
 
 const TMP_DATA_FILE = "/tmp/data.json";
 const TMP_PROJECTS_FILE = "/tmp/projects.json";
-const SEED_DATA_FILE = path.join(process.cwd(), "data.json");
-const SEED_PROJECTS_FILE = path.join(process.cwd(), "projects.json");
+
+function findSeedFile(filename: string): string | null {
+  const candidates = [
+    path.join(process.cwd(), filename),
+    path.resolve(__dirname, "../..", filename),
+    path.resolve(__dirname, "..", filename),
+    path.resolve(filename),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
 
 export function encrypt(text: string): string {
   if (!text) return "";
@@ -35,19 +46,21 @@ export function decrypt(text: string): string {
   }
 }
 
-function ensureFile(tmpPath: string, seedPath: string, fallback: string) {
+function ensureFile(tmpPath: string, seedFilename: string, fallback: string) {
   if (!fs.existsSync(tmpPath)) {
-    try {
-      const seed = fs.readFileSync(seedPath, "utf8");
-      fs.writeFileSync(tmpPath, seed);
-    } catch {
-      fs.writeFileSync(tmpPath, fallback);
+    const seedPath = findSeedFile(seedFilename);
+    if (seedPath) {
+      try {
+        fs.writeFileSync(tmpPath, fs.readFileSync(seedPath, "utf8"));
+        return;
+      } catch { /* fall through */ }
     }
+    fs.writeFileSync(tmpPath, fallback);
   }
 }
 
 export function readCredentials(): any[] {
-  ensureFile(TMP_DATA_FILE, SEED_DATA_FILE, "[]");
+  ensureFile(TMP_DATA_FILE, "data.json", "[]");
   try {
     const data = fs.readFileSync(TMP_DATA_FILE, "utf8");
     const credentials = JSON.parse(data);
@@ -73,7 +86,7 @@ export function writeCredentials(credentials: any[]) {
 }
 
 export function readProjects(): string[] {
-  ensureFile(TMP_PROJECTS_FILE, SEED_PROJECTS_FILE, '["General"]');
+  ensureFile(TMP_PROJECTS_FILE, "projects.json", '["General"]');
   try {
     const data = fs.readFileSync(TMP_PROJECTS_FILE, "utf8");
     return JSON.parse(data);
